@@ -1,0 +1,6 @@
+rg_name = "257-d51a5c9a-create-a-managed-identity"
+location = "westus"
+kv_name = "kv"
+kv_sku_name = "Standard"
+kv_secret_name = "vm_pass"
+nsg = "nsg-001"
