@@ -18,17 +18,20 @@ resource "azurerm_network_security_group" "network_security_group" {
   name = var.nsg
   resource_group_name = var.rg_name
   location = var.location
-  security_rule = {
-    name                       = "AllowRDP"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "RDP"
-    source_port_range          = "*"
-    destination_port_range     = "3389"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
+}
+
+resource "azurerm_network_security_rule" "example" {
+  name                        = "AllowRDP"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "*"
+  source_port_range           = "*"
+  destination_port_range      = "3389"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = var.rg_name
+  network_security_group_name = azurerm_network_security_group.network_security_group.name
 }
 
 resource "azurerm_virtual_network" "virtual_network" {
@@ -74,19 +77,21 @@ resource "azurerm_key_vault" "key_vault" {
   location = var.location
   tenant_id = data.azurerm_client_config.current.tenant_id
   sku_name = var.kv_sku_name
+}
 
-  access_policy = {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
-    secret_permission = [
-      "Set",
-      "Get",
-      "Delete",
-      "Purge",
-      "Recover",
-      "List"
-    ]
-  }
+resource "azurerm_key_vault_access_policy" "key_vault_access_policy" {
+  key_vault_id = azurerm_key_vault.key_vault.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azurerm_client_config.current.object_id
+
+  secret_permissions = [
+    "Set",
+    "Get",
+    "Delete",
+    "Purge",
+    "Recover",
+    "List"
+  ]
 }
 
 resource "random_password" "password" {
@@ -111,7 +116,7 @@ resource "azurerm_windows_virtual_machine" "virtual_machine" {
   network_interface_ids = [azurerm_network_interface.network_interface1.id,]
   
   os_disk {
-    caching = "Read/Write"
+    caching = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
 

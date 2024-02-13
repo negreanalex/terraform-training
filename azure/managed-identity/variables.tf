@@ -1,28 +1,28 @@
 variable "environment" {
-  type = "String"
+  type = string
   default = "Test"
 }
 
 variable "rg_name" {
-  type = "String"
+  type = string
 }
 
 variable "location" {
-  type = "String"
+  type = string
 }
 
 variable "kv_name" {
-  type = "String"
+  type = string
 }
 
 variable "kv_sku_name" {
-  type = "String"
+  type = string
 }
 
 variable "kv_secret_name" {
-  type = "String"
+  type = string
 }
 
 variable "nsg" {
-  type = "String"
+  type = string
 }
