@@ -14,6 +14,11 @@ provider "azurerm" {
 
 data "azurerm_client_config" "current" {}
 
+resource "azurerm_resource_group" "resource_group" {
+  name = var.rg_name
+  location = var.location
+}
+
 resource "azurerm_network_security_group" "network_security_group" {
   name = var.nsg
   resource_group_name = var.rg_name
@@ -84,6 +89,8 @@ resource "azurerm_key_vault_access_policy" "key_vault_access_policy" {
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = data.azurerm_client_config.current.object_id
 
+  key_permissions = [ "Get" ]
+
   secret_permissions = [
     "Set",
     "Get",
@@ -107,10 +114,10 @@ resource "azurerm_key_vault_secret" "key_vault_secret" {
 }
 
 resource "azurerm_windows_virtual_machine" "virtual_machine" {
-  name = "MythicalVM001"
-  resource_group_name = "257-d51a5c9a-create-a-managed-identity"
-  location = "westus"
-  size = "B2ms"
+  name = "VM001"
+  resource_group_name = var.rg_name
+  location = var.location
+  size = "Standard_B2ms"
   admin_username = "azureadmin"
   admin_password = azurerm_key_vault_secret.key_vault_secret.value
   network_interface_ids = [azurerm_network_interface.network_interface1.id,]
