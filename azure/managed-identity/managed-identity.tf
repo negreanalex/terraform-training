@@ -25,7 +25,7 @@ resource "azurerm_network_security_group" "network_security_group" {
   location = var.location
 }
 
-resource "azurerm_network_security_rule" "example" {
+resource "azurerm_network_security_rule" "nsg_rule_RDP" {
   name                        = "AllowRDP"
   priority                    = 100
   direction                   = "Inbound"
