@@ -20,3 +20,11 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+#Backend file
+backend.tfbackend
+#Terraform initialize folders
+.terraform
+#Terraform lock files
+.terraform.lock.hcl
+#Terraform state files
+terraform.tfstate
