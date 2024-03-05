@@ -1,0 +1,78 @@
+trigger: none
+
+pool:
+  name: Self-Hosted Agents
+  demands:
+  - agent.name -equals vm-agent-prod
+
+variables:
+  resource_group_name: "rg-tfstate-dev-uksouth"
+  storage_account_name: "tfstatedev49"
+  container_name: "tfstate"
+  key: "terraform.tfstate_docker"
+
+stages:
+  - stage: tfvalidate
+    jobs:
+      - job: validate
+        continueOnError: false
+        steps:
+          - task: TerraformInstaller@1
+            displayName: terafform install
+            inputs:
+              terraformVersion: 'latest'
+          - task: TerraformTaskV4@4
+            displayName: terraform init
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              backendServiceArm: 'DevTestConnection'
+              backendAzureRmResourceGroupName: '$(resource_group_name)'
+              backendAzureRmStorageAccountName: '$(storage_account_name)'
+              backendAzureRmContainerName: '$(container_name)'
+              backendAzureRmKey: '$(key)'
+          - task: TerraformTaskV4@4
+            displayName: terraform validate
+            inputs:
+              provider: 'azurerm'
+              command: 'validate'
+  - stage: tfdeploy
+    condition: succeeded('tfvalidate')
+    dependsOn: tfvalidate
+    jobs:
+      - job: apply
+        steps:
+          - task: TerraformInstaller@1
+            displayName: terafform install
+            inputs:
+              terraformVersion: 'latest'
+          - task: TerraformTaskV4@4
+            displayName: terraform init
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              backendServiceArm: 'DevTestConnection'
+              backendAzureRmResourceGroupName: '$(resource_group_name)'
+              backendAzureRmStorageAccountName: '$(storage_account_name)'
+              backendAzureRmContainerName: '$(container_name)'
+              backendAzureRmKey: '$(key)'
+          - task: TerraformTaskV4@4
+            displayName: terraform plan
+            inputs:
+              provider: 'azurerm'
+              command: 'plan'
+              commandOptions: -input=false -var-file="variables.tfvars"
+              environmentServiceNameAzureRM: 'DevTestConnection'
+          - task: TerraformTaskV4@4
+            displayName: terraform apply
+            inputs:
+              provider: 'azurerm'
+              command: 'apply'
+              commandOptions: -input=false -var-file="variables.tfvars"
+              environmentServiceNameAzureRM: 'DevTestConnection'
+          - task: TerraformTaskV4@4
+            displayName: terraform output
+            inputs:
+              provider: 'azurerm'
+              command: 'output'
+              environmentServiceNameAzureRM: 'DevTestConnection'
